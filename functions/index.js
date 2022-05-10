@@ -1,35 +1,65 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 
+var serviceAccount = require("./service-account.json");
+
 const cors = require("cors");
 
-admin.initializeApp();
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 const db = admin.firestore();
 
 const WebSocket = require("ws");
 var ws = new WebSocket("wss://stream.binance.com:9443/ws/!ticker@arr");
 
 const coins = [
-  "BTC",
-  "ETH",
-  "BNB",
-  "BCH",
   "ADA",
+  "ALGO",
+  "AMP",
   "ATOM",
-  "DOT",
-  "SHIB",
-  "DOGE",
+  "AVAX",
+  "AXS",
+  "BAL",
+  "BCH",
+  "BTC",
+  "CAKE",
+  "COMP",
+  "CRV",
   "DASH",
-  "XRP",
+  "DOGE",
+  "DOT",
+  "EGLD",
+  "ENJ",
+  "ETC",
+  "ETH",
   "FIL",
+  "FTM",
+  "FTT",
+  "ICP",
+  "KSM",
   "LINK",
   "LTC",
+  "LUNA",
+  "MANA",
+  "MATIC",
+  "MIR",
   "MKR",
+  "NEAR",
   "PAXG",
-  "SOL",
+  "QNT",
+  "QUICK",
+  "SHIB",
+  "SNX",
+  "SQL",
+  "SUSHI",
+  "TRB",
+  "UMA",
   "UNI",
   "XMR",
+  "XRP",
   "YFI",
+  "ZEC",
 ];
 
 var tickers = [];
@@ -87,11 +117,13 @@ getAllBids = () => {
         uid: Object.values(doc._fieldsProto.uid)[0],
       });
     });
+
+    // console.log(bids);
   });
 
   setTimeout(() => {
     bids.forEach((e) => {
-      //   console.log(e.uid);
+      // console.log(e.uid);
 
       db.doc(`users/${e.uid}`)
         .collection("bid")
@@ -99,10 +131,8 @@ getAllBids = () => {
         .onSnapshot((snap) => {
           var coin = snap.data();
 
-          // console.log(coin);
-
           bidTransactions.push({ ...coin, ...e });
-          //   console.log(bidTransactions);
+          console.log(bidTransactions);
         });
     });
   }, 1500);
@@ -141,11 +171,7 @@ getAllSls = () => {
 };
 
 checkForBids = () => {
-  //   console.log(bidTransactions);
-
   bidTransactions.forEach((b) => {
-    // console.log(b.pair.split("-")[0]);
-
     tickers.forEach((ticker) => {
       var sym = ticker.s;
 
@@ -153,7 +179,7 @@ checkForBids = () => {
         // console.log(ticker.a);
 
         if (b.trade === "buy") {
-          //   console.log(b.bid);
+          // console.log(b.bid);
 
           if (ticker.a >= b.bid) {
             // console.log(ticker.a >= b.bid);
@@ -184,12 +210,12 @@ checkForBids = () => {
                     quantity: b.quantity,
                   })
                   .then(() => {
+                    db.collection("bids").doc(b.transactionId).delete();
+
                     db.doc(`users/${b.uid}`)
                       .collection("bid")
                       .doc(b.transactionId)
                       .delete();
-
-                    db.collection("bid").doc(b.transactionId).delete();
                   })
               : db
                   .doc(`users/${b.uid}`)
@@ -216,12 +242,12 @@ checkForBids = () => {
                     quantity: b.quantity,
                   })
                   .then(() => {
+                    db.collection("bids").doc(b.transactionId).delete();
+
                     db.doc(`users/${b.uid}`)
                       .collection("bid")
                       .doc(b.transactionId)
                       .delete();
-
-                    db.collection("bid").doc(b.transactionId).delete();
                   });
 
             return;
@@ -258,12 +284,12 @@ checkForBids = () => {
                     quantity: b.quantity,
                   })
                   .then(() => {
+                    db.collection("bids").doc(b.transactionId).delete();
+
                     db.doc(`users/${b.uid}`)
                       .collection("bid")
                       .doc(b.transactionId)
                       .delete();
-
-                    db.collection("bid").doc(b.transactionId).delete();
                   })
               : db
                   .doc(`users/${b.uid}`)
@@ -290,12 +316,12 @@ checkForBids = () => {
                     quantity: b.quantity,
                   })
                   .then(() => {
+                    db.collection("bids").doc(b.transactionId).delete();
+
                     db.doc(`users/${b.uid}`)
                       .collection("bid")
                       .doc(b.transactionId)
                       .delete();
-
-                    db.collection("bid").doc(b.transactionId).delete();
                   });
 
             return;
@@ -307,11 +333,9 @@ checkForBids = () => {
 };
 
 checkForSls = () => {
-  //   console.log(slTransactions);
+  // console.log(slTransactions);
 
   slTransactions.forEach((b) => {
-    // console.log(b.pair.split("-")[0]);
-
     tickers.forEach((ticker) => {
       var sym = ticker.s;
 
@@ -350,12 +374,12 @@ checkForSls = () => {
                     quantity: b.quantity,
                   })
                   .then(() => {
+                    db.collection("sls").doc(b.transactionId).delete();
+
                     db.doc(`users/${b.uid}`)
                       .collection("sl")
                       .doc(b.transactionId)
                       .delete();
-
-                    db.collection("sls").doc(b.transactionId).delete();
                   })
               : db
                   .doc(`users/${b.uid}`)
@@ -382,12 +406,12 @@ checkForSls = () => {
                     quantity: b.quantity,
                   })
                   .then(() => {
+                    db.collection("sls").doc(b.transactionId).delete();
+
                     db.doc(`users/${b.uid}`)
                       .collection("sl")
                       .doc(b.transactionId)
                       .delete();
-
-                    db.collection("sls").doc(b.transactionId).delete();
                   });
 
             return;
@@ -424,12 +448,12 @@ checkForSls = () => {
                     quantity: b.quantity,
                   })
                   .then(() => {
+                    db.collection("sls").doc(b.transactionId).delete();
+
                     db.doc(`users/${b.uid}`)
                       .collection("sl")
                       .doc(b.transactionId)
                       .delete();
-
-                    db.collection("sls").doc(b.transactionId).delete();
                   })
               : db
                   .doc(`users/${b.uid}`)
@@ -456,12 +480,12 @@ checkForSls = () => {
                     quantity: b.quantity,
                   })
                   .then(() => {
+                    db.collection("sls").doc(b.transactionId).delete();
+
                     db.doc(`users/${b.uid}`)
                       .collection("sl")
                       .doc(b.transactionId)
                       .delete();
-
-                    db.collection("sls").doc(b.transactionId).delete();
                   });
 
             return;
@@ -475,10 +499,10 @@ checkForSls = () => {
 socketData();
 allUserUid();
 
-setTimeout(() => {
+setInterval(() => {
   getAllBids();
   getAllSls();
-}, 2000);
+}, 2500);
 
 setInterval(() => {
   checkForBids();
