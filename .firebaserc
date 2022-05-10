@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "cft-usd-c31bb"
-  }
+    "cryptofuturetrade": "cryptofuturetrade-c22f0",
+    "default": "cryptofuturetrade-c22f0"
+  },
+  "targets": {}
 }
